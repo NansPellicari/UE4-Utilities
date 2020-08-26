@@ -12,12 +12,38 @@ FZoneBox::FZoneBox()
 	Rotation = FRotator::ZeroRotator;
 }
 
-FBox FZoneBox::GetBox(bool bDebug, const UObject* WorldContextObject, FColor Color) const
+FBox FZoneBox::GetBox() const
 {
-	return UMathExtensionLibrary::CreateBoxFronInitAndExtend(Origin, Extent, Rotation, bDebug, WorldContextObject, Color);
+	return UMathExtensionLibrary::CreateBoxFromInitAndExtend(Origin, Extent, Rotation);
 }
 
-FBox UMathExtensionLibrary::CreateBoxFronInitAndExtend(const FVector& Origin,
+FSphere FZoneBox::GetSphere() const
+{
+	float W = (Origin - (Origin + Extent)).Size();
+	FSphere Sphere(Origin, W);
+
+	return Sphere;
+}
+FSphere FZoneBox::GetSphereXY() const
+{
+	FVector OToE = Origin + Extent;
+	float W = (Origin - FVector(OToE.X, OToE.Y, Origin.Z)).Size();
+	FSphere Sphere(Origin, W);
+	return Sphere;
+}
+
+bool FZoneBox::Intersect(const FZoneBox& Other) const
+{
+	bool bIsIntersect = false;
+	if (GetBox().Intersect(Other.GetBox()))
+	{
+		bIsIntersect = GetSphereXY().Intersects(Other.GetSphereXY());
+	}
+
+	return bIsIntersect;
+}
+
+FBox UMathExtensionLibrary::CreateBoxFromInitAndExtend(const FVector& Origin,
 	const FVector& Extent,
 	const FRotator& Rotation,
 	bool bDebug,
@@ -37,42 +63,22 @@ FBox UMathExtensionLibrary::CreateBoxFronInitAndExtend(const FVector& Origin,
 		FVector(Extent.X, Extent.Y, Extent.Z),
 	};
 
-	for (FVector& Node : Vertices)
+	FBox NewBox(ForceInit);
+
+	for (FVector& Vertex : Vertices)
 	{
-		Node = Origin + Transform.TransformPosition(Node);
+		NewBox += Origin + Transform.TransformPosition(Vertex);
 	}
 
 #if WITH_EDITOR
-	if (bDebug == true)
+	if (bDebug)
 	{
-		TArray<FDrawLines> Edges = {
-			FDrawLines(FVector2D(0, 1), FColor(0, 255, 255)),	   // turquoise
-			FDrawLines(FVector2D(1, 3), FColor(255, 0, 255)),	   // pink
-			FDrawLines(FVector2D(3, 2), FColor(255, 255, 0)),	   // yellow
-			FDrawLines(FVector2D(2, 0), FColor(255, 0, 0)),		   // red
-			FDrawLines(FVector2D(6, 4), FColor(0, 0, 0)),		   // black
-			FDrawLines(FVector2D(7, 6), FColor(255, 255, 255)),	   // white
-			FDrawLines(FVector2D(3, 7), FColor(0, 0, 124)),		   // deep blue
-			FDrawLines(FVector2D(2, 6), FColor(124, 0, 0)),		   // deep red
-			FDrawLines(FVector2D(0, 4), FColor(124, 124, 124)),	   // grey
-			FDrawLines(FVector2D(5, 7), FColor(0, 0, 255)),		   // blue
-			FDrawLines(FVector2D(4, 5), FColor(0, 255, 0)),		   // green
-			FDrawLines(FVector2D(1, 5), FColor(0, 124, 0)),		   // deep green
-		};
-
-		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-
-		for (FDrawLines& Edge : Edges)
-		{
-			FVector& Node1 = Vertices[Edge.Position.X];
-			FVector& Node2 = Vertices[Edge.Position.Y];
-			DrawDebugLine(World, Node1, Node2, Color, false, 10.f, SDPG_World, 1.f);
-		}
+		UMathExtensionLibrary::DrawDebugBox(WorldContextObject, NewBox, Color, 10.f, 1.f);
 		UE_LOG(LogTemp, Warning, TEXT("%s create a box"), ANSI_TO_TCHAR(__FUNCTION__));
 	}
 #endif
 
-	return FBox(Vertices);
+	return NewBox;
 }
 
 FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(const UObject* WorldContextObject,
@@ -153,4 +159,78 @@ FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(cons
 #endif
 
 	return TrigoData;
+}
+
+FBox UMathExtensionLibrary::GetBox(const FZoneBox& ZoneBox)
+{
+	return ZoneBox.GetBox();
+}
+
+void UMathExtensionLibrary::DrawDebugBox(
+	const UObject* WorldContextObject, const FBox& Box, FColor Color, float LifeTime, float Thickness)
+{
+	TArray<FDrawLines> Edges = {
+		FDrawLines(FVector2D(0, 1), FColor(0, 255, 255)),	   // turquoise
+		FDrawLines(FVector2D(1, 3), FColor(255, 0, 255)),	   // pink
+		FDrawLines(FVector2D(3, 2), FColor(255, 255, 0)),	   // yellow
+		FDrawLines(FVector2D(2, 0), FColor(255, 0, 0)),		   // red
+		FDrawLines(FVector2D(6, 4), FColor(0, 0, 0)),		   // black
+		FDrawLines(FVector2D(7, 6), FColor(255, 255, 255)),	   // white
+		FDrawLines(FVector2D(3, 7), FColor(0, 0, 124)),		   // deep blue
+		FDrawLines(FVector2D(2, 6), FColor(124, 0, 0)),		   // deep red
+		FDrawLines(FVector2D(0, 4), FColor(124, 124, 124)),	   // grey
+		FDrawLines(FVector2D(5, 7), FColor(0, 0, 255)),		   // blue
+		FDrawLines(FVector2D(4, 5), FColor(0, 255, 0)),		   // green
+		FDrawLines(FVector2D(1, 5), FColor(0, 124, 0)),		   // deep green
+	};
+
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+
+	TArray<FVector> Vertices = {FVector(Box.Min.X, Box.Min.Y, Box.Min.Z),
+		FVector(Box.Min.X, Box.Min.Y, Box.Max.Z),
+		FVector(Box.Min.X, Box.Max.Y, Box.Min.Z),
+		FVector(Box.Min.X, Box.Max.Y, Box.Max.Z),
+		FVector(Box.Max.X, Box.Min.Y, Box.Min.Z),
+		FVector(Box.Max.X, Box.Min.Y, Box.Max.Z),
+		FVector(Box.Max.X, Box.Max.Y, Box.Min.Z),
+		FVector(Box.Max)};
+
+	for (FDrawLines& Edge : Edges)
+	{
+		FVector& Node1 = Vertices[Edge.Position.X];
+		FVector& Node2 = Vertices[Edge.Position.Y];
+		DrawDebugLine(World, Node1, Node2, Color, false, LifeTime, SDPG_World, Thickness);
+	}
+}
+
+void UMathExtensionLibrary::DebugZoneBox(const UObject* WorldContextObject,
+	const FZoneBox& Box,
+	bool bBox,
+	bool bSphereXY,
+	bool bSphere,
+	FLinearColor ColorBox,
+	FLinearColor ColorSphereXY,
+	FLinearColor ColorSphere,
+	float LifeTime,
+	float Thickness)
+{
+	if (bBox)
+	{
+		UMathExtensionLibrary::DrawDebugBox(WorldContextObject, Box.GetBox(), ColorBox.ToFColor(true), LifeTime, Thickness);
+	}
+
+	if (bSphere)
+	{
+		FSphere Sphere = Box.GetSphere();
+		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		DrawDebugSphere(World, Sphere.Center, Sphere.W, 12, ColorSphere.ToFColor(true), false, LifeTime, SDPG_World, Thickness);
+	}
+
+	if (bSphereXY)
+	{
+		FSphere SphereXY = Box.GetSphereXY();
+		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		DrawDebugSphere(
+			World, SphereXY.Center, SphereXY.W, 12, ColorSphereXY.ToFColor(true), false, LifeTime, SDPG_World, Thickness);
+	}
 }

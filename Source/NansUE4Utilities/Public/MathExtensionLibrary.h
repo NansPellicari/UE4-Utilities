@@ -46,7 +46,10 @@ struct NANSUE4UTILITIES_API FZoneBox
 
 	FZoneBox(FVector _Origin, FVector _Extent, FRotator _Rotation) : Origin(_Origin), Extent(_Extent), Rotation(_Rotation) {}
 
-	FBox GetBox(bool bDebug = false, const UObject* WorldContextObject = nullptr, FColor Color = FColor(255, 255, 0)) const;
+	FBox GetBox() const;
+	FSphere GetSphere() const;
+	FSphere GetSphereXY() const;
+	bool Intersect(const FZoneBox& Other) const;
 };
 
 USTRUCT(BlueprintType)
@@ -99,7 +102,14 @@ class NANSUE4UTILITIES_API UMathExtensionLibrary : public UBlueprintFunctionLibr
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
-	static FBox CreateBoxFronInitAndExtend(const FVector& Origin,
+	static void DrawDebugBox(const UObject* WorldContextObject,
+		const FBox& Box,
+		FColor Color = FColor(255, 255, 255),
+		float LifeTime = 0.f,
+		float Thickness = 0.f);
+
+	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
+	static FBox CreateBoxFromInitAndExtend(const FVector& Origin,
 		const FVector& Extent,
 		const FRotator& Rotation,
 		bool bDebug = false,
@@ -108,6 +118,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Extension")
 	static bool IsBoxIntersect(const FBox& Box1, const FBox& Box2)
+	{
+		return Box1.Intersect(Box2);
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
+	static void DebugZoneBox(const UObject* WorldContextObject,
+		const FZoneBox& Box,
+		bool bBox = false,
+		bool bSphereXY = false,
+		bool bSphere = false,
+		FLinearColor ColorBox = FLinearColor(255, 255, 0),
+		FLinearColor ColorSphereXY = FLinearColor(255, 255, 0),
+		FLinearColor ColorSphere = FLinearColor(255, 255, 0),
+		float LifeTime = 0.f,
+		float Thickness = 0.f);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Extension")
+	static bool IsZoneBoxIntersect(const FZoneBox& Box1, const FZoneBox& Box2)
 	{
 		return Box1.Intersect(Box2);
 	}
@@ -124,6 +152,12 @@ public:
 
 		return RelativeTransform.TransformPosition(RotatedVect.RotateAngleAxis(Degree, Axis.GetSafeNormal()));
 	}
+
+	UFUNCTION(BlueprintCallable,
+		BlueprintPure,
+		Category = "Math|Extension",
+		meta = (WorldContext = "WorldContextObject", AdvancedDisplay = 1))
+	static FBox GetBox(const FZoneBox& ZoneBox);
 
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
 	static FTrigonometryDataForZone GetTrigonometryDataForAZone(const UObject* WorldContextObject,
