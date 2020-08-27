@@ -90,7 +90,10 @@ public:
 
 	/** Point on corner coordinate (Z depends on the zone center @see PivotPointNormalized) */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	FVector PointOnCorner;
+	FVector RightCorner;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
+	FVector LeftCorner;
 };
 
 /**
@@ -162,9 +165,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
 	static FTrigonometryDataForZone GetTrigonometryDataForAZone(const UObject* WorldContextObject,
 		FVector PivotPoint,
-		FVector ZoneBoxCenter,
-		FVector ZoneBoxVolume,
+		const FZoneBox& ZoneBox,
 		float SafeDegree,
-		ELateralityOrientation Side = ELateralityOrientation::Left,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ELateralityOrientation")) int32 Side,
 		bool bDebug = false);
 };

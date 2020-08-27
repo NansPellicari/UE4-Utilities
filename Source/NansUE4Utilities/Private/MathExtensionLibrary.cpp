@@ -14,7 +14,8 @@ FZoneBox::FZoneBox()
 
 FBox FZoneBox::GetBox() const
 {
-	return UMathExtensionLibrary::CreateBoxFromInitAndExtend(Origin, Extent, Rotation);
+	// return UMathExtensionLibrary::CreateBoxFromInitAndExtend(Origin, Extent, FRotator::ZeroRotator);
+	return FBox(Origin - Extent, Origin + Extent);
 }
 
 FSphere FZoneBox::GetSphere() const
@@ -26,8 +27,10 @@ FSphere FZoneBox::GetSphere() const
 }
 FSphere FZoneBox::GetSphereXY() const
 {
-	FVector OToE = Origin + Extent;
-	float W = (Origin - FVector(OToE.X, OToE.Y, Origin.Z)).Size();
+	FVector OToE = Origin + FVector(Extent.X, Extent.Y, 0);
+	FVector OToEOpposite = Origin - FVector(-Extent.X, Extent.Y, 0);
+	FVector MiddlePoint = (OToEOpposite + OToE) / 2;
+	float W = (Origin - MiddlePoint).Size();
 	FSphere Sphere(Origin, W);
 	return Sphere;
 }
@@ -81,34 +84,43 @@ FBox UMathExtensionLibrary::CreateBoxFromInitAndExtend(const FVector& Origin,
 	return NewBox;
 }
 
-FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(const UObject* WorldContextObject,
-	FVector PivotPoint,
-	FVector ZoneBoxCenter,
-	FVector ZoneBoxVolume,
-	float SafeDegree,
-	ELateralityOrientation Side,
-	bool bDebug)
+FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(
+	const UObject* WorldContextObject, FVector PivotPoint, const FZoneBox& ZoneBox, float SafeDegree, int32 Side, bool bDebug)
 {
 	FTrigonometryDataForZone TrigoData;
-	TrigoData.PivotPointNormalized = FVector(PivotPoint.X, PivotPoint.Y, ZoneBoxCenter.Z);
+	TrigoData.PivotPointNormalized = FVector(PivotPoint.X, PivotPoint.Y, ZoneBox.Origin.Z);
 
-	FVector ZoneCenterToPivot = (ZoneBoxCenter - TrigoData.PivotPointNormalized);
+	FVector ZoneCenterToPivot = (ZoneBox.Origin - TrigoData.PivotPointNormalized);
 	TrigoData.RadiusToZoneCenter = ZoneCenterToPivot.Size();
-	TrigoData.RadiusToZoneBorder = TrigoData.RadiusToZoneCenter - ZoneBoxVolume.Y;
+	TrigoData.RadiusToZoneBorder = TrigoData.RadiusToZoneCenter;
 	TrigoData.PointOnZoneBorder =
 		TrigoData.PivotPointNormalized + (ZoneCenterToPivot.GetSafeNormal() * TrigoData.RadiusToZoneBorder);
 
-	// TOA --> Tangent =  Oposite / Adjacent --> T = ZoneBoxVolume Half size / RadiusToZoneBorder
-	TrigoData.RadiusToHypotenuseDegree = UKismetMathLibrary::DegAtan(ZoneBoxVolume.X / TrigoData.RadiusToZoneBorder) + SafeDegree;
+	// TOA --> Tangent =  Oposite / Adjacent --> T = ZoneBox.Extent Half size / RadiusToZoneBorder
+	TrigoData.RadiusToHypotenuseDegree = UKismetMathLibrary::DegAtan(ZoneBox.Extent.X / TrigoData.RadiusToZoneBorder) + SafeDegree;
 
 	// C = A / H --> H = A / C --> PivotToCornerLength = RadiusToZoneBorder / Cos(RadiusToHypotenuseDegree)
 	TrigoData.PivotToCornerLength = TrigoData.RadiusToZoneBorder / UKismetMathLibrary::DegCos(TrigoData.RadiusToHypotenuseDegree);
 
-	FVector TmpVect = UMathExtensionLibrary::RotateVectorRelativeTo(
-		TrigoData.PivotPointNormalized, TrigoData.PointOnZoneBorder, TrigoData.RadiusToHypotenuseDegree, FVector(0, 0, 1));
+	if (Side & ELateralityOrientation::Right)
+	{
+		if (bDebug) UE_LOG(LogTemp, Warning, TEXT("%s - compute for right side"), ANSI_TO_TCHAR(__FUNCTION__));
+		FVector TmpVect = UMathExtensionLibrary::RotateVectorRelativeTo(
+			TrigoData.PivotPointNormalized, TrigoData.PointOnZoneBorder, TrigoData.RadiusToHypotenuseDegree, FVector(0, 0, 1));
 
-	TrigoData.PointOnCorner = TrigoData.PivotPointNormalized +
-							  ((TmpVect - TrigoData.PivotPointNormalized).GetSafeNormal() * TrigoData.PivotToCornerLength);
+		TrigoData.RightCorner = TrigoData.PivotPointNormalized +
+								((TmpVect - TrigoData.PivotPointNormalized).GetSafeNormal() * TrigoData.PivotToCornerLength);
+	}
+	if (Side & ELateralityOrientation::Left)
+	{
+		if (bDebug) UE_LOG(LogTemp, Warning, TEXT("%s - compute for left side"), ANSI_TO_TCHAR(__FUNCTION__));
+
+		FVector TmpVect = UMathExtensionLibrary::RotateVectorRelativeTo(
+			TrigoData.PivotPointNormalized, TrigoData.PointOnZoneBorder, -TrigoData.RadiusToHypotenuseDegree, FVector(0, 0, 1));
+
+		TrigoData.LeftCorner = TrigoData.PivotPointNormalized +
+							   ((TmpVect - TrigoData.PivotPointNormalized).GetSafeNormal() * TrigoData.PivotToCornerLength);
+	}
 
 #if WITH_EDITOR
 	if (bDebug)
@@ -117,8 +129,8 @@ FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(cons
 			Warning,
 			TEXT("%s - tan(RadiusToHypotenuseDegree): %f"),
 			ANSI_TO_TCHAR(__FUNCTION__),
-			ZoneBoxVolume.X / TrigoData.RadiusToZoneBorder);
-		UE_LOG(LogTemp, Warning, TEXT("%s - ZoneBoxVolume: %s"), ANSI_TO_TCHAR(__FUNCTION__), *ZoneBoxVolume.ToString());
+			ZoneBox.Extent.X / TrigoData.RadiusToZoneBorder);
+		UE_LOG(LogTemp, Warning, TEXT("%s - ZoneBox.Extent: %s"), ANSI_TO_TCHAR(__FUNCTION__), *ZoneBox.Extent.ToString());
 		UE_LOG(LogTemp, Warning, TEXT("%s - RadiusToZoneCenter: %f"), ANSI_TO_TCHAR(__FUNCTION__), TrigoData.RadiusToZoneCenter);
 		UE_LOG(LogTemp, Warning, TEXT("%s - RadiusToZoneBorder: %f"), ANSI_TO_TCHAR(__FUNCTION__), TrigoData.RadiusToZoneBorder);
 		UE_LOG(LogTemp,
@@ -131,7 +143,8 @@ FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(cons
 			TEXT("%s - PivotPointNormalized: %s"),
 			ANSI_TO_TCHAR(__FUNCTION__),
 			*TrigoData.PivotPointNormalized.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("%s - PointOnCorner: %s"), ANSI_TO_TCHAR(__FUNCTION__), *TrigoData.PointOnCorner.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s - RightCorner: %s"), ANSI_TO_TCHAR(__FUNCTION__), *TrigoData.RightCorner.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("%s - LeftCorner: %s"), ANSI_TO_TCHAR(__FUNCTION__), *TrigoData.LeftCorner.ToString());
 		UE_LOG(LogTemp,
 			Warning,
 			TEXT("%s - RadiusToHypotenuseDegree: %f"),
@@ -147,14 +160,28 @@ FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(cons
 			SDPG_World,
 			1.f);
 
-		DrawDebugLine(WorldContextObject->GetWorld(),
-			FVector(TrigoData.PivotPointNormalized.X, TrigoData.PivotPointNormalized.Y, TrigoData.PivotPointNormalized.Z + 50),
-			FVector(TrigoData.PointOnCorner.X, TrigoData.PointOnCorner.Y, TrigoData.PointOnCorner.Z + 50),
-			FColor(0, 255, 0),
-			false,
-			10.f,
-			SDPG_World,
-			1.f);
+		if (Side & ELateralityOrientation::Right)
+		{
+			DrawDebugLine(WorldContextObject->GetWorld(),
+				FVector(TrigoData.PivotPointNormalized.X, TrigoData.PivotPointNormalized.Y, TrigoData.PivotPointNormalized.Z + 50),
+				FVector(TrigoData.RightCorner.X, TrigoData.RightCorner.Y, TrigoData.RightCorner.Z + 50),
+				FColor(0, 255, 0),
+				false,
+				10.f,
+				SDPG_World,
+				1.f);
+		}
+		if (Side & ELateralityOrientation::Left)
+		{
+			DrawDebugLine(WorldContextObject->GetWorld(),
+				FVector(TrigoData.PivotPointNormalized.X, TrigoData.PivotPointNormalized.Y, TrigoData.PivotPointNormalized.Z + 50),
+				FVector(TrigoData.LeftCorner.X, TrigoData.LeftCorner.Y, TrigoData.LeftCorner.Z + 50),
+				FColor(0, 0, 255),
+				false,
+				10.f,
+				SDPG_World,
+				1.f);
+		}
 	}
 #endif
 
