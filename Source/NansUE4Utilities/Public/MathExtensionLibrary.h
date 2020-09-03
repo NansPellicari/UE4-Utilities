@@ -5,51 +5,15 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NansCoreHelpers/Public/Math/MathUtilities.h"
 
 #include "MathExtensionLibrary.generated.h"
-
-#define TOFLAG(Enum) (1 << static_cast<uint8>(Enum))
-
-/** This is relative to the zone, not the player */
-UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum ELateralityOrientation
-{
-	None = 0 UMETA(Hidden),
-	Left = 0x00000001,
-	Right = 0x00000002,
-};
-
-ENUM_CLASS_FLAGS(ELateralityOrientation)
 
 struct NANSUE4UTILITIES_API FDrawLines
 {
 	FVector2D Position;
 	FColor Color;
 	FDrawLines(FVector2D _Position, FColor _Color) : Position(_Position), Color(_Color) {}
-};
-
-USTRUCT(BlueprintType)
-struct NANSUE4UTILITIES_API FZoneBox
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ZoneBox|Settings")
-	FVector Origin;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ZoneBox|Settings")
-	FVector Extent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ZoneBox|Settings")
-	FRotator Rotation;
-
-	FZoneBox();
-
-	FZoneBox(FVector _Origin, FVector _Extent, FRotator _Rotation) : Origin(_Origin), Extent(_Extent), Rotation(_Rotation) {}
-
-	FBox GetBox() const;
-	FSphere GetSphere() const;
-	FSphere GetSphereXY() const;
-	bool Intersect(const FZoneBox& Other) const;
 };
 
 USTRUCT(BlueprintType)
@@ -94,6 +58,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
 	FVector LeftCorner;
+
+	TCorners GetCorners() const
+	{
+		return {LeftCorner, RightCorner};
+	};
 };
 
 /**
@@ -163,10 +132,10 @@ public:
 	static FBox GetBox(const FZoneBox& ZoneBox);
 
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
-	static FTrigonometryDataForZone GetTrigonometryDataForAZone(const UObject* WorldContextObject,
-		FVector PivotPoint,
+	static FTrigonometryDataForZone GetTrigonometryDataForAZone(FVector PivotPoint,
 		const FZoneBox& ZoneBox,
 		float SafeDegree,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ELateralityOrientation")) int32 Side,
-		bool bDebug = false);
+		bool bDebug = false,
+		const UObject* WorldContextObject = nullptr);
 };

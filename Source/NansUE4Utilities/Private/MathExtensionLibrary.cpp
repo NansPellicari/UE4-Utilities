@@ -5,47 +5,6 @@
 #include "DrawDebugHelpers.h"
 #include "EngineGlobals.h"
 
-FZoneBox::FZoneBox()
-{
-	Origin = FVector::ZeroVector;
-	Extent = FVector::ZeroVector;
-	Rotation = FRotator::ZeroRotator;
-}
-
-FBox FZoneBox::GetBox() const
-{
-	// return UMathExtensionLibrary::CreateBoxFromInitAndExtend(Origin, Extent, FRotator::ZeroRotator);
-	return FBox(Origin - Extent, Origin + Extent);
-}
-
-FSphere FZoneBox::GetSphere() const
-{
-	float W = (Origin - (Origin + Extent)).Size();
-	FSphere Sphere(Origin, W);
-
-	return Sphere;
-}
-FSphere FZoneBox::GetSphereXY() const
-{
-	FVector OToE = Origin + FVector(Extent.X, Extent.Y, 0);
-	FVector OToEOpposite = Origin - FVector(-Extent.X, Extent.Y, 0);
-	FVector MiddlePoint = (OToEOpposite + OToE) / 2;
-	float W = (Origin - MiddlePoint).Size();
-	FSphere Sphere(Origin, W);
-	return Sphere;
-}
-
-bool FZoneBox::Intersect(const FZoneBox& Other) const
-{
-	bool bIsIntersect = false;
-	if (GetBox().Intersect(Other.GetBox()))
-	{
-		bIsIntersect = GetSphereXY().Intersects(Other.GetSphereXY());
-	}
-
-	return bIsIntersect;
-}
-
 FBox UMathExtensionLibrary::CreateBoxFromInitAndExtend(const FVector& Origin,
 	const FVector& Extent,
 	const FRotator& Rotation,
@@ -85,7 +44,7 @@ FBox UMathExtensionLibrary::CreateBoxFromInitAndExtend(const FVector& Origin,
 }
 
 FTrigonometryDataForZone UMathExtensionLibrary::GetTrigonometryDataForAZone(
-	const UObject* WorldContextObject, FVector PivotPoint, const FZoneBox& ZoneBox, float SafeDegree, int32 Side, bool bDebug)
+	FVector PivotPoint, const FZoneBox& ZoneBox, float SafeDegree, int32 Side, bool bDebug, const UObject* WorldContextObject)
 {
 	FTrigonometryDataForZone TrigoData;
 	TrigoData.PivotPointNormalized = FVector(PivotPoint.X, PivotPoint.Y, ZoneBox.Origin.Z);
