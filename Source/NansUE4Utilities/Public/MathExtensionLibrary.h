@@ -111,6 +111,11 @@ public:
 	{
 		return Box1.Intersect(Box2);
 	}
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Extension")
+	static bool IsLeft(const FVector& A, const FVector& B, const FVector& Point)
+	{
+		return ((B.X - A.X) * (Point.Y - A.Y) - (B.Y - A.Y) * (Point.X - A.X)) < 0;
+	}
 
 	/**
 	 * inspired by https://answers.unrealengine.com/questions/477185/rotate-vector-about-axis-with-pivot-point.html
