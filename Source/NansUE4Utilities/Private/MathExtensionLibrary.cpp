@@ -2,6 +2,7 @@
 
 #include "MathExtensionLibrary.h"
 
+#include "EngineGlobals.h"
 #include "DrawDebugHelpers.h"
 #include "EngineGlobals.h"
 
@@ -191,31 +192,46 @@ void UMathExtensionLibrary::DrawDebugBox(
 
 void UMathExtensionLibrary::DebugZoneBox(const UObject* WorldContextObject,
 	const FZoneBox& Box,
+	bool bBoundingBox,
 	bool bBox,
 	bool bSphereXY,
 	bool bSphere,
+	bool bOrientedBox,
+	FLinearColor ColorBoundingBox,
 	FLinearColor ColorBox,
+	FLinearColor ColorOrientedBox,
 	FLinearColor ColorSphereXY,
 	FLinearColor ColorSphere,
 	float LifeTime,
 	float Thickness)
 {
-	if (bBox)
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (bBoundingBox || Box.CollideOn == EZoneCollider::AABB)
+	{
+		UMathExtensionLibrary::DrawDebugBox(
+			WorldContextObject, Box.GetBoundingBox(), ColorBoundingBox.ToFColor(true), LifeTime, Thickness);
+	}
+
+	if (bOrientedBox || Box.CollideOn == EZoneCollider::OBB)
+	{
+		::DrawDebugBox(
+			World, Box.Origin, Box.Extent, Box.Rotation.Quaternion(), ColorOrientedBox.ToFColor(true), LifeTime, Thickness);
+	}
+
+	if (bBox || Box.CollideOn == EZoneCollider::AAB)
 	{
 		UMathExtensionLibrary::DrawDebugBox(WorldContextObject, Box.GetBox(), ColorBox.ToFColor(true), LifeTime, Thickness);
 	}
 
-	if (bSphere)
+	if (bSphere || Box.CollideOn == EZoneCollider::Sphere)
 	{
 		FSphere Sphere = Box.GetSphere();
-		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 		DrawDebugSphere(World, Sphere.Center, Sphere.W, 12, ColorSphere.ToFColor(true), false, LifeTime, SDPG_World, Thickness);
 	}
 
-	if (bSphereXY)
+	if (bSphereXY || Box.CollideOn == EZoneCollider::SphereXY)
 	{
 		FSphere SphereXY = Box.GetSphereXY();
-		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 		DrawDebugSphere(
 			World, SphereXY.Center, SphereXY.W, 12, ColorSphereXY.ToFColor(true), false, LifeTime, SDPG_World, Thickness);
 	}

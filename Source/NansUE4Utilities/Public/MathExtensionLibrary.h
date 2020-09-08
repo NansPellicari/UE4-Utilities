@@ -97,11 +97,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
 	static void DebugZoneBox(const UObject* WorldContextObject,
 		const FZoneBox& Box,
+		bool bBoundingBox = false,
 		bool bBox = false,
 		bool bSphereXY = false,
 		bool bSphere = false,
-		FLinearColor ColorBox = FLinearColor(255, 255, 0),
-		FLinearColor ColorSphereXY = FLinearColor(255, 255, 0),
+		bool bOrientedBox = false,
+		FLinearColor ColorBoundingBox = FLinearColor(255, 0, 0),
+		FLinearColor ColorBox = FLinearColor(0, 255, 0),
+		FLinearColor ColorOrientedBox = FLinearColor(0, 0, 255),
+		FLinearColor ColorSphereXY = FLinearColor(255, 0, 255),
 		FLinearColor ColorSphere = FLinearColor(255, 255, 0),
 		float LifeTime = 0.f,
 		float Thickness = 0.f);
