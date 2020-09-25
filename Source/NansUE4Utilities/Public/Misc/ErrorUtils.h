@@ -8,7 +8,18 @@
 #include "UObject/NoExportTypes.h"
 
 #if WITH_EDITOR
-#define EDITOR_ERROR(MsgChannel, Text, Object) UNErrorUtils::ThrowErrorToEditor(MsgChannel, Text, Object, __LINE__);
+#define EDITOR_ERROR_1(MsgChannel, Text) UNErrorUtils::ThrowErrorToEditor(MsgChannel, Text, this, __LINE__);
+#define EDITOR_ERROR_2(MsgChannel, Text, Object) UNErrorUtils::ThrowErrorToEditor(MsgChannel, Text, Object, __LINE__);
+#define EDITOR_ERROR_0()
+
+// thanks to https://github.com/jason-deng/C99FunctionOverload
+#define FUNC_CHOOSER(_f1, _f2, _f3, _f4, ...) _f4
+#define FUNC_RECOMPOSER(argsWithParentheses) FUNC_CHOOSER argsWithParentheses
+#define CHOOSE_FROM_ARG_COUNT(...) FUNC_RECOMPOSER((__VA_ARGS__, EDITOR_ERROR_2, EDITOR_ERROR_1, ))
+#define NO_ARG_EXPANDER() , , EDITOR_ERROR_0
+#define MACRO_CHOOSER(...) CHOOSE_FROM_ARG_COUNT(NO_ARG_EXPANDER __VA_ARGS__())
+
+#define EDITOR_ERROR(...) MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 #define EDITOR_WARN(...) UNErrorUtils::ThrowWarningToEditor(__VA_ARGS__, this, __LINE__);
 #define SCREEN_LOG(duration, color, format, ...) \
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, duration, color, FString::Printf(TEXT(format), ##__VA_ARGS__), false)
