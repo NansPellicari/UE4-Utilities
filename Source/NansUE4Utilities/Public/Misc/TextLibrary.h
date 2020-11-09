@@ -7,7 +7,7 @@
 
 #include "TextLibrary.generated.h"
 
-#define EnumToString(EnumClassName, ValueOfEnum) \
+#define ENUM_TO_STRING(EnumClassName, ValueOfEnum) \
 	UNTextLibrary::GetEnumValueAsString<EnumClassName>(FString(TEXT(#EnumClassName)), (ValueOfEnum))
 
 UCLASS()

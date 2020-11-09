@@ -215,7 +215,7 @@ void UMathExtensionLibrary::DebugZoneBox(const UObject* WorldContextObject,
 	if (bOrientedBox || Box.CollideOn == EZoneCollider::OBB)
 	{
 		::DrawDebugBox(
-			World, Box.Origin, Box.Extent, Box.Rotation.Quaternion(), ColorOrientedBox.ToFColor(true), LifeTime, Thickness);
+			World, Box.Origin, Box.Extent, Box.Rotation.Quaternion(), ColorOrientedBox.ToFColor(true), false, LifeTime, 0, Thickness);
 	}
 
 	if (bBox || Box.CollideOn == EZoneCollider::AAB)
