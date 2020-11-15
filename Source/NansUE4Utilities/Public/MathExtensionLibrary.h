@@ -74,13 +74,6 @@ class NANSUE4UTILITIES_API UMathExtensionLibrary : public UBlueprintFunctionLibr
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
-	static void DrawDebugBox(const UObject* WorldContextObject,
-		const FBox& Box,
-		FColor Color = FColor(255, 255, 255),
-		float LifeTime = 0.f,
-		float Thickness = 0.f);
-
-	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
 	static FBox CreateBoxFromInitAndExtend(const FVector& Origin,
 		const FVector& Extent,
 		const FRotator& Rotation,
@@ -93,22 +86,6 @@ public:
 	{
 		return Box1.Intersect(Box2);
 	}
-
-	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
-	static void DebugZoneBox(const UObject* WorldContextObject,
-		const FZoneBox& Box,
-		bool bBoundingBox = false,
-		bool bBox = false,
-		bool bSphereXY = false,
-		bool bSphere = false,
-		bool bOrientedBox = false,
-		FLinearColor ColorBoundingBox = FLinearColor(255, 0, 0),
-		FLinearColor ColorBox = FLinearColor(0, 255, 0),
-		FLinearColor ColorOrientedBox = FLinearColor(0, 0, 255),
-		FLinearColor ColorSphereXY = FLinearColor(255, 0, 255),
-		FLinearColor ColorSphere = FLinearColor(255, 255, 0),
-		float LifeTime = 0.f,
-		float Thickness = 0.f);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Extension")
 	static bool IsZoneBoxIntersect(const FZoneBox& Box1, const FZoneBox& Box2)
@@ -147,4 +124,28 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ELateralityOrientation")) int32 Side,
 		bool bDebug = false,
 		const UObject* WorldContextObject = nullptr);
+
+#if WITH_EDITOR
+	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
+	static void DebugZoneBox(const UObject* WorldContextObject,
+		const FZoneBox& Box,
+		bool bBoundingBox = false,
+		bool bBox = false,
+		bool bSphereXY = false,
+		bool bSphere = false,
+		bool bOrientedBox = false,
+		FLinearColor ColorBoundingBox = FLinearColor(255, 0, 0),
+		FLinearColor ColorBox = FLinearColor(0, 255, 0),
+		FLinearColor ColorOrientedBox = FLinearColor(0, 0, 255),
+		FLinearColor ColorSphereXY = FLinearColor(255, 0, 255),
+		FLinearColor ColorSphere = FLinearColor(255, 255, 0),
+		float LifeTime = 0.f,
+		float Thickness = 0.f);
+	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))
+	static void DrawDebugBox(const UObject* WorldContextObject,
+		const FBox& Box,
+		FColor Color = FColor(255, 255, 255),
+		float LifeTime = 0.f,
+		float Thickness = 0.f);
+#endif
 };
