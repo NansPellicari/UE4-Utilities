@@ -33,26 +33,31 @@
 class UNErrorUtils
 {
 public:
-	static void ThrowErrorToEditor(const FName& LogMsgChannel, const FText& Text, const UObject* Object, const int32& Line = -1)
+	static void ThrowErrorToEditor(const FName& LogMsgChannel, const FText& Text, const UObject* Object,
+		const int32& Line = -1)
 	{
 		auto Message = FMessageLog(LogMsgChannel).Error();
-		Message->AddToken(FTextToken::Create(Text))->AddToken(FUObjectToken::Create((UObject*) Object));
+		Message->AddToken(FTextToken::Create(Text))->AddToken(FUObjectToken::Create((UObject*)Object));
 		if (Line >= 0)
 		{
 			Message->AddToken(
-				FTextToken::Create(FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(Line))));
+				FTextToken::Create(FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(Line)))
+			);
 		}
 
 		UE_LOG(LogTemp, Error, TEXT("%s (%s) - line %d"), *Text.ToString(), *Object->GetName(), Line);
 	}
-	static void ThrowWarningToEditor(const FName& LogChannel, const FText& Text, const UObject* Object, const int32& Line = -1)
+
+	static void ThrowWarningToEditor(const FName& LogChannel, const FText& Text, const UObject* Object,
+		const int32& Line = -1)
 	{
 		auto Message = FMessageLog(LogChannel).Warning();
-		Message->AddToken(FTextToken::Create(Text))->AddToken(FUObjectToken::Create((UObject*) Object));
+		Message->AddToken(FTextToken::Create(Text))->AddToken(FUObjectToken::Create((UObject*)Object));
 		if (Line >= 0)
 		{
 			Message->AddToken(
-				FTextToken::Create(FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(Line))));
+				FTextToken::Create(FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(Line)))
+			);
 		}
 
 		UE_LOG(LogTemp, Warning, TEXT("%s (%s) - line %d"), *Text.ToString(), *Object->GetName(), Line);
