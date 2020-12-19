@@ -40,8 +40,6 @@ struct NANSUE4UTILITIES_API FNFlashMessage
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Message")
 	EFlashMessagePriorityLevel PriorityLevel = EFlashMessagePriorityLevel::NORMAL;
 
-	float _TimeDisplayed = 0;
-
 	void Clear()
 	{
 		Message = FText::GetEmpty();
