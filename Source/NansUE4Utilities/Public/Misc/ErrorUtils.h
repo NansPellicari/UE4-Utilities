@@ -30,12 +30,8 @@
 #define EDITOR_ERROR(...) MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 #define EDITOR_WARN(...) MACRO_CHOOSER_WARN(__VA_ARGS__)(__VA_ARGS__)
 
-#if WITH_EDITOR
 #define SCREEN_LOG(duration, color, format, ...) \
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, duration, color, FString::Printf(TEXT(format), ##__VA_ARGS__), false)
-#else
-#define SCREEN_LOG(duration, color, format, ...)
-#endif
 
 
 class UNErrorUtils
