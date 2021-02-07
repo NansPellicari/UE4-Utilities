@@ -1,3 +1,16 @@
+//  Copyright 2020-present Nans Pellicari (nans.pellicari@gmail.com).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,8 +37,9 @@ public:
 		{
 			return FString("(Invalid Enum)");
 		}
-		return enumPtr->GetNameStringByValue((int64) Value);
+		return enumPtr->GetNameStringByValue(static_cast<int64>(Value));
 	}
+
 	template <typename TEnum>
 	static FORCEINLINE FString GetEnumValueAsString(const FString& Name, TArray<TEnum> Values)
 	{
@@ -42,18 +56,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
 	static FString UniqueStringFromName(const FName& Text)
 	{
-		return UNTextLibrary::UniqueString(Text);
+		return UniqueString(Text);
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
 	static FString UniqueStringFromText(const FText& Text)
 	{
-		return UNTextLibrary::UniqueString(Text);
+		return UniqueString(Text);
 	}
 
 	// Return true is they are Permutations, false otherwise
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
-	static bool ComparePermutations(const FString& StringFrom, const FString& StringToCompare, TMap<FString, int32>& Results)
+	static bool ComparePermutations(const FString& StringFrom, const FString& StringToCompare,
+		TMap<FString, int32>& Results)
 	{
 		if (ArePermutations(StringFrom, StringToCompare) == false)
 		{
@@ -148,13 +163,13 @@ public:
 
 		for (FString CurLine : CurrentLines)
 		{
-			TArray<FString> Words = UNTextLibrary::StringTotWordsArray(CurLine);
+			TArray<FString> Words = StringTotWordsArray(CurLine);
 			int32 CharCounter = 0;
 			FString TempLine;
 
 			for (FString Word : Words)
 			{
-				CharCounter += Word.Len() + 1;	  // +1 for empty space
+				CharCounter += Word.Len() + 1; // +1 for empty space
 				if (CharCounter >= MaxCharPerLine)
 				{
 					CharCounter = 0;
@@ -178,7 +193,7 @@ public:
 	static FString StringToLines(
 		const FString Text, int32 MaxCharPerLine = 100, FString PrependLine = "", FString AppendLine = "\n")
 	{
-		TArray<FString> Lines = UNTextLibrary::StringToLinesArray(Text, MaxCharPerLine);
+		TArray<FString> Lines = StringToLinesArray(Text, MaxCharPerLine);
 		FString FinalText;
 
 		for (FString Line : Lines)
@@ -187,5 +202,17 @@ public:
 		}
 
 		return FinalText.TrimEnd();
+	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities|Text")
+	static FText NameToDisplayText(const FName Name)
+	{
+		return FText::FromString(NameToDisplayString(Name));
+	}
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities|Text")
+	static FString NameToDisplayString(const FName Name)
+	{
+		return FName::NameToDisplayString(Name.ToString(), false);
 	}
 };
