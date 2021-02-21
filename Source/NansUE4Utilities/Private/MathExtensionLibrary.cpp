@@ -171,6 +171,36 @@ FBox UMathExtensionLibrary::GetBox(const FZoneBox& ZoneBox)
 	return ZoneBox.GetBox();
 }
 
+FRotator UMathExtensionLibrary::GetRotation(const FVector FirstPoint, const FVector PivotPoint,
+    const FVector SecondPoint)
+{
+	const FRotator Rot1 = UKismetMathLibrary::FindLookAtRotation(
+        PivotPoint,
+        FirstPoint
+    );
+	const FRotator Rot2 = UKismetMathLibrary::FindLookAtRotation(
+        PivotPoint,
+        SecondPoint
+    );
+
+	FRotator RotDef = Rot1 - Rot2;
+	// I don't really know for what reason they are working differently,
+	// but in world map -90.f deg means "90 deg to the left of the pivot point"
+	// and with FindLookAtRotation means "90 deg to the right"
+	// so we have to inverse it here.
+	RotDef = RotDef.GetInverse();
+	if (RotDef.Yaw > 180.f)
+	{
+		RotDef.Yaw = 360.f - RotDef.Yaw;
+	}
+	if (RotDef.Yaw < -180.f)
+	{
+		RotDef.Yaw = -360.f - RotDef.Yaw;
+	}
+	return RotDef;
+}
+
+
 #if WITH_EDITOR
 void UMathExtensionLibrary::DrawDebugBox(
 	const UObject* WorldContextObject, const FBox& Box, FColor Color, float LifeTime, float Thickness)
