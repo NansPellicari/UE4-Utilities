@@ -22,6 +22,8 @@
 
 #define ENUM_TO_STRING(EnumClassName, ValueOfEnum) \
 	UNTextLibrary::GetEnumValueAsString<EnumClassName>(FString(TEXT(#EnumClassName)), (ValueOfEnum))
+#define ENUMNAME_TO_STRING(EnumClassName, ValueOfEnum) \
+	UNTextLibrary::GetEnumValueAsString<EnumClassName>(FString(TEXT(#EnumClassName)), (ValueOfEnum), true)
 
 UCLASS()
 class NANSUE4UTILITIES_API UNTextLibrary : public UBlueprintFunctionLibrary
@@ -30,12 +32,16 @@ class NANSUE4UTILITIES_API UNTextLibrary : public UBlueprintFunctionLibrary
 
 public:
 	template <typename TEnum>
-	static FORCEINLINE FString GetEnumValueAsString(const FString& Name, TEnum Value)
+	static FORCEINLINE FString GetEnumValueAsString(const FString& Name, TEnum Value, const bool bDisplayName = false)
 	{
 		const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *Name, true);
 		if (!enumPtr)
 		{
 			return FString("(Invalid Enum)");
+		}
+		if (bDisplayName)
+		{
+			return enumPtr->GetDisplayNameTextByValue(static_cast<int64>(Value)).ToString();
 		}
 		return enumPtr->GetNameStringByValue(static_cast<int64>(Value));
 	}
