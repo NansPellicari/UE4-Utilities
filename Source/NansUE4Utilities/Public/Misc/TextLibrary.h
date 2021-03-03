@@ -1,4 +1,4 @@
-//  Copyright 2020-present Nans Pellicari (nans.pellicari@gmail.com).
+// Copyright 2020-present Nans Pellicari (nans.pellicari@gmail.com).
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -215,10 +215,35 @@ public:
 	{
 		return FText::FromString(NameToDisplayString(Name));
 	}
-	
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities|Text")
 	static FString NameToDisplayString(const FName Name)
 	{
 		return FName::NameToDisplayString(Name.ToString(), false);
+	}
+
+	static FString WorldTypeToString(const EWorldType::Type Type)
+	{
+		switch (Type)
+		{
+			case EWorldType::None:
+				return TEXT("None");
+			case EWorldType::Game:
+				return TEXT("Game");
+			case EWorldType::Editor:
+				return TEXT("Editor");
+			case EWorldType::PIE:
+				return TEXT("PIE");
+			case EWorldType::EditorPreview:
+				return TEXT("EditorPreview");
+			case EWorldType::GamePreview:
+				return TEXT("GamePreview");
+			case EWorldType::GameRPC:
+				return TEXT("GameRPC");
+			case EWorldType::Inactive:
+				return TEXT("Inactive");
+			default:
+				return TEXT("Unknown");
+		}
 	}
 };
