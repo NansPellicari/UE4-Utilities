@@ -134,15 +134,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
 	static bool LettersAreInString(const FString& StringFrom, const FString& StringToCompare)
 	{
-		bool isIn = true;
+		bool bIsIn = true;
 
-		for (TCHAR Char : StringToCompare)
+		for (TCHAR Char : StringFrom)
 		{
 			int32 Index;
-			isIn = StringFrom.FindChar(Char, Index) && isIn;
+			bIsIn = StringToCompare.FindChar(Char, Index) && bIsIn;
 		}
 
-		return isIn;
+		return bIsIn;
 	}
 
 	template <typename T>
