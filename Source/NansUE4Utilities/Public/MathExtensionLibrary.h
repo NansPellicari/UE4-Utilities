@@ -137,7 +137,7 @@ public:
 		bool bDebug = false,
 		const UObject* WorldContextObject = nullptr);
 
-	UFUNCTION(BlueprintCallable, Category="Geometry")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Geometry")
 	static FRotator GetRotation(const FVector FirstPoint, const FVector PivotPoint, const FVector SecondPoint);
 
 #if WITH_EDITOR

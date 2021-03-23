@@ -134,15 +134,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
 	static bool LettersAreInString(const FString& StringFrom, const FString& StringToCompare)
 	{
-		bool isIn = true;
+		bool bIsIn = true;
 
-		for (TCHAR Char : StringToCompare)
+		for (TCHAR Char : StringFrom)
 		{
 			int32 Index;
-			isIn = StringFrom.FindChar(Char, Index) && isIn;
+			bIsIn = StringToCompare.FindChar(Char, Index) && bIsIn;
 		}
 
-		return isIn;
+		return bIsIn;
 	}
 
 	template <typename T>
@@ -152,7 +152,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Text")
-	static TArray<FString> StringTotWordsArray(const FString Text)
+	static TArray<FString> StringToWordsArray(const FString Text)
 	{
 		TArray<FString> Words;
 		const FString Delimiter = FString(TEXT(" "));
@@ -169,7 +169,7 @@ public:
 
 		for (FString CurLine : CurrentLines)
 		{
-			TArray<FString> Words = StringTotWordsArray(CurLine);
+			TArray<FString> Words = StringToWordsArray(CurLine);
 			int32 CharCounter = 0;
 			FString TempLine;
 
