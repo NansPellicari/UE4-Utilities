@@ -18,15 +18,15 @@
 
 #define LOCTEXT_NAMESPACE "NansComparator"
 
-bool UNansComparator::EvaluateOperator(const ENansConditionOperator Operator, const bool Val1, const bool Val2)
+bool UNansComparator::EvaluateOperator(const ENConditionOperator Operator, const bool Val1, const bool Val2)
 {
 	bool Result = true;
 	switch (Operator)
 	{
-		case ENansConditionOperator::XOR:
+		case ENConditionOperator::XOR:
 			Result = Val1 == !Val2;
 			break;
-		case ENansConditionOperator::OR:
+		case ENConditionOperator::OR:
 			Result = Val1 || Val2;
 			break;
 		default:
@@ -66,7 +66,7 @@ bool UNansComparator::EvaluateOperators(
 		bool Result = EvaluateOperator(ConditionOperator.Operator, Operand1->value, Operand2->value);
 
 		Result = ConditionOperator.Inversed ? !Result : Result;
-		if (ConditionOperator.OperatorWithPreviousCondition == ENansConditionOperator::Save)
+		if (ConditionOperator.OperatorWithPreviousCondition == ENConditionOperator::Save)
 		{
 			FinalResult = Result;
 		}
@@ -103,21 +103,21 @@ FString UNansComparator::BuildKeyFromIndex(const int32 Index)
 	return FString("C") + FString::FromInt(Index);
 }
 
-FString UNansComparator::ComparatorToString(ENansConditionComparator NansComparator)
+FString UNansComparator::ComparatorToString(ENConditionComparator NansComparator)
 {
 	switch (NansComparator)
 	{
-		case ENansConditionComparator::Inferior:
+		case ENConditionComparator::Inferior:
 			return FString("<");
-		case ENansConditionComparator::InferiorOrEquals:
+		case ENConditionComparator::InferiorOrEquals:
 			return FString("<=");
-		case ENansConditionComparator::Superior:
+		case ENConditionComparator::Superior:
 			return FString(">");
-		case ENansConditionComparator::SuperiorOrEquals:
+		case ENConditionComparator::SuperiorOrEquals:
 			return FString(">=");
-		case ENansConditionComparator::NotEquals:
+		case ENConditionComparator::NotEquals:
 			return FString("!=");
-		case ENansConditionComparator::Equals:
+		case ENConditionComparator::Equals:
 		default:
 			return FString("==");
 	}
@@ -144,9 +144,9 @@ FString UNansComparator::OperatorToString(FNansConditionOperator Condition)
 {
 	return FString::Printf(
 		TEXT("(%s) %s %s %s%s GroupName: %s"),
-		*ENUM_TO_STRING(ENansConditionOperator, Condition.OperatorWithPreviousCondition),
+		*ENUM_TO_STRING(ENConditionOperator, Condition.OperatorWithPreviousCondition),
 		*Condition.Operand1,
-		*ENUM_TO_STRING(ENansConditionOperator, Condition.Operator),
+		*ENUM_TO_STRING(ENConditionOperator, Condition.Operator),
 		*Condition.Operand2,
 		*(Condition.Inversed ? FString("(IsInversed)") : FString("")),
 		*Condition.GroupName

@@ -16,7 +16,7 @@
 #include "NansComparatorHelpers.generated.h"
 
 UENUM(BlueprintType)
-enum class ENansConditionComparator : uint8
+enum class ENConditionComparator : uint8
 {
 	Equals UMETA(DisplayName = "=="),
 	Superior UMETA(DisplayName = ">"),
@@ -27,7 +27,7 @@ enum class ENansConditionComparator : uint8
 };
 
 UENUM(BlueprintType)
-enum class ENansConditionOperator : uint8
+enum class ENConditionOperator : uint8
 {
 	AND UMETA(DisplayName = "AND"),
 	OR UMETA(DisplayName = "OR"),
@@ -41,7 +41,6 @@ struct BoolStruct
 	BoolStruct(bool _val = true) : value(_val) {};
 };
 
-
 /**
  * This is a structure to create a condition with 2 Operand
  */
@@ -51,14 +50,14 @@ struct NANSUE4UTILITIES_API FNansConditionOperator
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Condition operator")
-	ENansConditionOperator OperatorWithPreviousCondition = ENansConditionOperator::AND;
+	ENConditionOperator OperatorWithPreviousCondition = ENConditionOperator::AND;
 
 	// Can be a condition (eg. "C1") or a group of condition specified in previous Condition Operator (eg. "G1") 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Condition operator")
 	FString Operand1;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Condition operator")
-	ENansConditionOperator Operator;
+	ENConditionOperator Operator = ENConditionOperator::AND;
 
 	// Can be a condition (eg. "C1") or a group of condition specified in this kind of settings (eg. "G1")
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Condition operator")

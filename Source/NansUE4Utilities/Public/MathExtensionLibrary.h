@@ -24,7 +24,9 @@ struct NANSUE4UTILITIES_API FDrawLines
 {
 	FVector2D Position;
 	FColor Color;
-	FDrawLines(FVector2D _Position, FColor _Color) : Position(_Position), Color(_Color) {}
+
+	FDrawLines(FVector2D _Position, FColor _Color) : Position(_Position),
+													 Color(_Color) {}
 };
 
 USTRUCT(BlueprintType)
@@ -38,37 +40,37 @@ public:
 	 * this to ease computation with single plan (X,Y)
 	 */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	FVector PivotPointNormalized;
+	FVector PivotPointNormalized = FVector::ZeroVector;
 
 	/** Length from the pivot point to the ZoneCenter */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	float RadiusToZoneCenter;
+	float RadiusToZoneCenter = 0.f;
 
 	/**
 	 * The point at the intersection on the radius (pivot point > zone center)
 	 * and the Zone border.
 	 */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	FVector PointOnZoneBorder;
+	FVector PointOnZoneBorder = FVector::ZeroVector;
 
 	/** Length from the pivot point to the ZoneBorder */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	float RadiusToZoneBorder;
+	float RadiusToZoneBorder = 0;
 
 	/** Length from the pivot point to the Zone corner = Hypotenuse */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	float PivotToCornerLength;
+	float PivotToCornerLength = 0;
 
 	/** Hypotenuse = PivotToCornerLength, Radius = RadiusToZoneBorder */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	float RadiusToHypotenuseDegree;
+	float RadiusToHypotenuseDegree = 0;
 
 	/** Point on corner coordinate (Z depends on the zone center @see PivotPointNormalized) */
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	FVector RightCorner;
+	FVector RightCorner = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TrigonometryDataForZone")
-	FVector LeftCorner;
+	FVector LeftCorner = FVector::ZeroVector;
 
 	TCorners GetCorners() const
 	{
@@ -123,10 +125,12 @@ public:
 		return RelativeTransform.TransformPosition(RotatedVect.RotateAngleAxis(Degree, Axis.GetSafeNormal()));
 	}
 
-	UFUNCTION(BlueprintCallable,
+	UFUNCTION(
+		BlueprintCallable,
 		BlueprintPure,
 		Category = "Math|Extension",
-		meta = (WorldContext = "WorldContextObject", AdvancedDisplay = 1))
+		meta = (WorldContext = "WorldContextObject", AdvancedDisplay = 1)
+	)
 	static FBox GetBox(const FZoneBox& ZoneBox);
 
 	UFUNCTION(BlueprintCallable, Category = "Math|Extension", meta = (WorldContext = "WorldContextObject"))

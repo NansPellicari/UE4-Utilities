@@ -33,36 +33,36 @@ class NANSUE4UTILITIES_API UNansComparator : public UObject
 public:
 	static bool EvaluateOperators(const TArray<FNansConditionOperator>& ConditionsOperators,
 		TMap<FString, BoolStruct*>& ConditionsResults, bool bDebug = false);
-	static bool EvaluateOperator(const ENansConditionOperator Operator, const bool Val1, const bool Val2);
+	static bool EvaluateOperator(const ENConditionOperator Operator, const bool Val1, const bool Val2);
 	static FString BuildKeyFromIndex(const int32 Index);
 	template <typename ValueToComp>
-	static bool EvaluateComparator(const ENansConditionComparator NansComparator, const ValueToComp Val1,
+	static bool EvaluateComparator(const ENConditionComparator NansComparator, const ValueToComp Val1,
 		const ValueToComp Val2);
-	static FString ComparatorToString(ENansConditionComparator NansComparator);
+	static FString ComparatorToString(ENConditionComparator NansComparator);
 	static FString OperatorsToString(TArray<FNansConditionOperator> ConditionsOperators, FString PrefixChar = "\n");
 	static FString OperatorToString(FNansConditionOperator Condition);
 };
 
 template <typename ValueToComp>
 FORCEINLINE bool UNansComparator::EvaluateComparator(
-	const ENansConditionComparator NansComparator,
+	const ENConditionComparator NansComparator,
 	const ValueToComp Val1,
 	const ValueToComp Val2
 )
 {
 	switch (NansComparator)
 	{
-		case ENansConditionComparator::Equals:
+		case ENConditionComparator::Equals:
 			return Val1 == Val2;
-		case ENansConditionComparator::Inferior:
+		case ENConditionComparator::Inferior:
 			return Val1 < Val2;
-		case ENansConditionComparator::InferiorOrEquals:
+		case ENConditionComparator::InferiorOrEquals:
 			return Val1 <= Val2;
-		case ENansConditionComparator::Superior:
+		case ENConditionComparator::Superior:
 			return Val1 > Val2;
-		case ENansConditionComparator::SuperiorOrEquals:
+		case ENConditionComparator::SuperiorOrEquals:
 			return Val1 >= Val2;
-		case ENansConditionComparator::NotEquals:
+		case ENConditionComparator::NotEquals:
 			return Val1 != Val2;
 		default:
 #if WITH_EDITOR
