@@ -70,23 +70,23 @@ public:
 		);
 	}
 
-	static void ThrowWarningToEditor(const FName& LogChannel, const FText& Text, const UObject* Object,
-		const int32& Line = -1)
+	static void ThrowWarningToEditor(const FName& InLogChannel, const FText& InText, const UObject* InObject,
+	                                 const int32& InLine = -1)
 	{
-		bool bValidObject = IsValid(Object) && !Object->HasAnyFlags(
+		bool bValidObject = IsValid(InObject) && !InObject->HasAnyFlags(
 								EObjectFlags::RF_BeginDestroyed | EObjectFlags::RF_FinishDestroyed
 							)
-							&& IsValid(Object->GetOuter()) && IsValid(Object->GetWorld());
+							&& IsValid(InObject->GetOuter()) && IsValid(InObject->GetWorld());
 #if WITH_EDITOR
 		if (bValidObject)
 		{
-			auto Message = FMessageLog(LogChannel).Warning();
-			Message->AddToken(FTextToken::Create(Text))->AddToken(FUObjectToken::Create((UObject*)Object));
-			if (Line >= 0)
+			auto Message = FMessageLog(InLogChannel).Warning();
+			Message->AddToken(FTextToken::Create(InText))->AddToken(FUObjectToken::Create((UObject*)InObject));
+			if (InLine >= 0)
 			{
 				Message->AddToken(
 					FTextToken::Create(
-						FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(Line))
+						FText::Format(NSLOCTEXT("Error", "LineNumber", "- line {0}"), FText::AsNumber(InLine))
 					)
 				);
 			}
@@ -97,9 +97,9 @@ public:
 			LogTemp,
 			Warning,
 			TEXT("%s (%s) - line %d"),
-			*Text.ToString(),
-			bValidObject ? *Object->GetName() : TEXT("Unknown"),
-			Line
+			*InText.ToString(),
+			bValidObject ? *InObject->GetName() : TEXT("Unknown"),
+			InLine
 		);
 	}
 };

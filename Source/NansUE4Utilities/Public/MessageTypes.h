@@ -17,7 +17,7 @@
 
 #include "MessageTypes.generated.h"
 
-UENUM (BlueprintType)
+UENUM(BlueprintType)
 enum class EFlashMessagePriorityLevel : uint8
 {
 	NORMAL,
@@ -27,7 +27,7 @@ enum class EFlashMessagePriorityLevel : uint8
 };
 
 
-USTRUCT (BlueprintType)
+USTRUCT(BlueprintType)
 struct NANSUE4UTILITIES_API FNFlashMessage
 {
 	GENERATED_BODY()

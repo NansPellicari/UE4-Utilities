@@ -18,7 +18,15 @@
 		{
 			"Name": "NansUE4Utilities",
 			"Type": "Runtime",
-			"LoadingPhase": "PreLoadingScreen"
+			"LoadingPhase": "PreLoadingScreen",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Mac",
+				"Linux"
+			],
+			"WhitelistTargets": [
+				"Editor"
+			]
 		}
 	],
 	"Plugins": [
