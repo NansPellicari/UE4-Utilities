@@ -21,9 +21,9 @@
 #include "TextLibrary.generated.h"
 
 #define ENUM_TO_STRING(EnumClassName, ValueOfEnum) \
-	UNTextLibrary::GetEnumValueAsString<EnumClassName>(FString(TEXT(#EnumClassName)), (ValueOfEnum))
+	UNTextLibrary::GetEnumValueAsString<EnumClassName>((ValueOfEnum))
 #define ENUMNAME_TO_STRING(EnumClassName, ValueOfEnum) \
-	UNTextLibrary::GetEnumValueAsString<EnumClassName>(FString(TEXT(#EnumClassName)), (ValueOfEnum), true)
+	UNTextLibrary::GetEnumValueAsString<EnumClassName>((ValueOfEnum), true)
 
 UCLASS()
 class NANSUE4UTILITIES_API UNTextLibrary : public UBlueprintFunctionLibrary
@@ -32,18 +32,15 @@ class NANSUE4UTILITIES_API UNTextLibrary : public UBlueprintFunctionLibrary
 
 public:
 	template <typename TEnum>
-	static FORCEINLINE FString GetEnumValueAsString(const FString& Name, TEnum Value, const bool bDisplayName = false)
+	static FORCEINLINE FString GetEnumValueAsString(TEnum Value, const bool bDisplayName = false)
 	{
-		const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *Name, true);
-		if (!enumPtr)
-		{
-			return FString("(Invalid Enum)");
-		}
+		// Thanks to this https://forums.unrealengine.com/t/findobject-withough-any-package/742812/3
+		static_assert( TIsUEnumClass<TEnum>::Value, "'TEnum' template parameter to GetEnumValueAsString must be a valid UEnum" );
 		if (bDisplayName)
 		{
-			return enumPtr->GetDisplayNameTextByValue(static_cast<int64>(Value)).ToString();
+			return StaticEnum<TEnum>()->GetDisplayNameTextByValue(static_cast<int32>(Value)).ToString();
 		}
-		return enumPtr->GetNameStringByValue(static_cast<int64>(Value));
+		return StaticEnum<TEnum>()->GetNameStringByValue(static_cast<int32>(Value));
 	}
 
 	template <typename TEnum>
