@@ -17,3 +17,5 @@
 #define LATER_SECS(seconds, ...) \
 FTimerHandle __tempTimerHandle; \
 GetWorldTimerManager().SetTimer(__tempTimerHandle, FTimerDelegate().CreateLambda(__VA_ARGS__), seconds, false);
+#define NEXT_TICK(...) \
+GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate().CreateLambda(__VA_ARGS__));
